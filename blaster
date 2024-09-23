@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <script src="https://www.gstatic.com/firebasejs/9.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.8.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <h1>Student Management System</h1>
+    <form id="studentForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="text" id="course" placeholder="Course" required>
+        <button type="submit">Add Student</button>
+    </form>
+    <ul id="studentList"></ul>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "code-blasters-90ac5",
+            storageBucket: "gs://code-blasters-90ac5.appspot.com/rahman.html",
+            messagingSenderId: "793431977113",
+            appId: "1:793431977113:android:73dcdc3112e5bbdff4dc08 ",
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Add a student
+        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const age = parseInt(document.getElementById('age').value);
+            const course = document.getElementById('course').value;
+
+            await db.collection('students').add({ name, age, course });
+            document.getElementById('studentForm').reset();
+            loadStudents();
+        });
+
+        // Load students
+        async function loadStudents() {
+            const studentList = document.getElementById('studentList'); 
+            studentList.innerHTML = '';
+            const snapshot = await db.collection('students').get();
+            snapshot.forEach(doc => {
+                const student = doc.data();
+                studentList.innerHTML += <li>${student.name}, Age: ${student.age}, Course: ${student.course} <button onclick="deleteStudent('${doc.id}')">Delete</button></li>;
+            });
+        }
+
+        // Delete a student
+        async function deleteStudent(id) {
+            await db.collection('students').doc(id).delete();
+            loadStudents();
+        }
+
+        // Load students on page load
+        loadStudents();
+    </script>
+</body>
+</html>
